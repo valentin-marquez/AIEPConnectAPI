@@ -16,13 +16,9 @@ async def get_user_info(aiep: ExternalApi):
     return await aiep.get_user_info()
 
 @router.get("/userInfo")
-async def get_user_info(email: str, password: str):
+async def get_user(email: str, password: str):
     aiep = get_external_api(email, password)
-    user_info = await get_user_info(aiep)
-    if user_info:
-        return user_info.dict()
-    else:
-        return {"message": "Error al obtener la información del usuario"}
+    return await get_user_info(aiep)
     
 @router.get("/userInfo/token")
 async def get_user_info_token(email: str, password: str):
