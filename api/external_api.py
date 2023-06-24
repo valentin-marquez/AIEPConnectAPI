@@ -64,7 +64,11 @@ class ExternalApi:
     async def call_service(self, data):
         async with httpx.AsyncClient() as client:
             response = await client.post(self.base_url, headers=self.headers, data=data)
+            print(response.status_code)
+            print(response.text)
             if response.status_code == 200:
+
+                print(response.json())
                 return response.json()
             else:
                 # Handle the error case
@@ -88,6 +92,7 @@ class ExternalApi:
         data = Formatter.get_data(params, 'authLoginClientAlumniV54', token)
 
         response = await self.call_service(data)
+    
         if response:
             login_response = response.get('response', {}).get('loginResponse', {})
             user_data = {
