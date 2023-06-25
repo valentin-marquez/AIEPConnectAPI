@@ -51,7 +51,7 @@ class Formatter:
 
 class ExternalApi:
     def __init__(self, username=None, password=None):
-        self.base_url = os.getenv('EXTERNAL_API_URL')
+        self.base_url = "https://aiep.cl.api.mooestroviva.com/moofwd-rt/gateway.sjson"
         self.headers = {
             'accept-encoding': 'gzip',
             'connection': 'Keep-Alive',
