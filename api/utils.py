@@ -170,6 +170,30 @@ class ZubronHelper:
         stringBuffer.append(ZubronHelper.TSE)
         return AESEncryption.encrypt(''.join(stringBuffer), os.getenv('TOKEN_SECRET_KEY'))
 
+    @staticmethod
+    def get_decrypted_token(token:str ):
+        decrypted_token = AESEncryption.decrypt(token, os.getenv('TOKEN_SECRET_KEY'))
+        return decrypted_token.split("*")
+    
+    @staticmethod
+    def get_username_from_token(token:str):
+        decrypted_token = ZubronHelper.get_decrypted_token(token)
+        return decrypted_token[2]
 
 
+class Token:
+    @staticmethod
+    def get_token(username:str):
+        return ZubronHelper.get_encrypted_token(username)
 
+    @staticmethod
+    def get_username_from_token(token:str):
+        return ZubronHelper.get_username_from_token(token)
+
+    @staticmethod
+    def get_decrypted_token(token:str):
+        return ZubronHelper.get_decrypted_token(token)
+
+    @staticmethod
+    def get_encrypted_token(username:str):
+        return ZubronHelper.get_encrypted_token(username)

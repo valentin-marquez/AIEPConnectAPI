@@ -1,4 +1,5 @@
 import httpx
+import os
 from api.schemas import User, Calendar, CourseList
 from api.models import CourseDataModel
 from api.utils import ZubronHelper
@@ -43,14 +44,14 @@ class Formatter:
                 'clientVersion': '1.0',
                 'clientID': '2',
                 'service': 'gradesGetGradesByCourseClientV4',
-                'token': ZubronHelper.get_encrypted_token(user_info.userNC),
+                'token': user_info.token,
             },
         }
 
 
 class ExternalApi:
-    def __init__(self, username, password=None):
-        self.base_url = 'https://aiep.cl.api.mooestroviva.com/moofwd-rt/gateway.sjson'
+    def __init__(self, username=None, password=None):
+        self.base_url = os.getenv('EXTERNAL_API_URL')
         self.headers = {
             'accept-encoding': 'gzip',
             'connection': 'Keep-Alive',
@@ -64,73 +65,81 @@ class ExternalApi:
     async def call_service(self, data):
         async with httpx.AsyncClient() as client:
             response = await client.post(self.base_url, headers=self.headers, data=data)
-            print(response.status_code)
-            print(response.text)
             if response.status_code == 200:
-
-                print(response.json())
                 return response.json()
             else:
                 # Handle the error case
                 return None
-    async def get_token(self):
-        return {
-            "token": ZubronHelper.get_encrypted_token(self.username.split("@")[0])
-        }
+
 
     async def get_user_info(self) -> User:
-        token = ZubronHelper.get_encrypted_token()
-        params = {
-            'deviceId': '6e3d8b16b33c6e5e',
-            'password': self.password,
-            'os_version': '3.10.86-g25d9364',
-            'username': self.username.split("@")[0],
-            'model': 'CAM-L03',
-            'lang': 'es',
-        }
-
-        data = Formatter.get_data(params, 'authLoginClientAlumniV54', token)
-
-        response = await self.call_service(data)
-    
-        if response:
-            login_response = response.get('response', {}).get('loginResponse', {})
-            user_data = {
-                'userId': login_response.get('userId'),
-                'userNC': login_response.get('userNC'),
-                'careersList': [career['careerId'] for career in login_response.get('careersList', [])],
-                'sede': login_response.get('sede'),
-                'name': login_response.get('name'),
+        try:
+            token = ZubronHelper.get_encrypted_token()
+            params = {
+                'deviceId': '6e3d8b16b33c6e5e',
+                'password': self.password,
+                'os_version': '3.10.86-g25d9364',
+                'username': self.username.split("@")[0],
+                'model': 'CAM-L03',
+                'lang': 'es',
             }
 
-            return User(**user_data)
+            data = Formatter.get_data(params, 'authLoginClientAlumniV54', token)
+
+            response = await self.call_service(data)
+
+            if response:
+                login_response = response.get(
+                    'response', {}).get('loginResponse', {})
+                user_data = {
+                    'userId': login_response.get('userId'),
+                    'userNC': login_response.get('userNC'),
+                    'careersList': [career['careerId'] for career in login_response.get('careersList', [])],
+                    'campus': login_response.get('sede'),
+                    'name': login_response.get('name'),
+                    'token': ZubronHelper.get_encrypted_token(login_response.get('userNC'))
+                }
+
+                return User(**user_data)
+
+        except ValidationError:
+            return None
 
     async def get_schedule(self, user: User) -> Calendar:
-        token = ZubronHelper.get_encrypted_token(username=user.userNC)
-        data = Formatter.get_data(user.to_params(), "scheduleGridClientV6", token)
+        data = Formatter.get_data(
+            user.to_params(), "scheduleGridClientV6", user.token)
 
         response = await self.call_service(data)
-        if response:
-            return Calendar.parse_obj(response)
-        else:
-            # Handle the case where no response is obtained
-            return None
+
+
+        if not response.get('error'):
+            return response
+        
+        raise Exception(response.get('error').get('ErrorMessage'))
+
+
 
     async def get_courses(self, user: User) -> CourseList:
-        token = ZubronHelper.get_encrypted_token(username=user.userNC)
-        data = Formatter.get_data(user.to_params(), "courseGetListClientV5", token)
+        data = Formatter.get_data(
+                user.to_params(), "courseGetListClientV5", user.token)
         response = await self.call_service(data)
-        if response:
-            return CourseList.parse_obj(response)
-        else:
-            # Handle the case where no response is obtained
-            return None
+
+        if not response.get('error'):
+            return response
+        
+        raise Exception(response.get('error').get('ErrorMessage'))
+
+
 
     async def get_grades(self, user: User, course_data: CourseDataModel):
-        data = Formatter.get_grades_data(user, course_data)
-        print(data)
-        response = await self.call_service(data)
         try:
-            return response
+            data = Formatter.get_grades_data(user, course_data)
+            response = await self.call_service(data)
+            
+            if not response.get('error'):
+                return response
+            
+            raise Exception(response.get('error').get('ErrorMessage'))
+
         except ValidationError:
             return None
