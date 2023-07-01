@@ -1,7 +1,8 @@
 from dotenv import load_dotenv
 from fastapi import FastAPI
-from api.routes import router
+from fastapi.middleware.cors import CORSMiddleware
 
+from api.routes import router
 
 load_dotenv()
 
@@ -13,6 +14,22 @@ app = FastAPI(
     redoc_url=None,
 
 )
+
+origins = [
+    "chrome-extension://bjpnoafcpgdhpfdniojakbpbonfehoci",
+    "http://localhost:8000",  # Agrega cualquier otro origen permitido si es necesario
+    "https://aiep-connect-api.vercel.app"
+]
+
+# middlewares 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 # Rutas de la API
 app.include_router(router)

@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 
+
 class CourseDataModel(BaseModel):
     courseType: str
     campus: str

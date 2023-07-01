@@ -1,8 +1,9 @@
 from fastapi import APIRouter, HTTPException
+from pydantic.error_wrappers import ValidationError
+
 from api import ExternalApi
 from api.models import CourseDataModel
-from pydantic.error_wrappers import ValidationError
-from api.schemas import Calendar, User, CourseList, GradesResponse
+from api.schemas import Calendar, CourseList, GradesResponse, User
 from api.utils import Token
 
 router = APIRouter(

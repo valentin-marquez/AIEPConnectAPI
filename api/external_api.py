@@ -1,9 +1,11 @@
-import httpx
 import os
-from api.schemas import User, Calendar, CourseList
-from api.models import CourseDataModel
-from api.utils import ZubronHelper
+
+import httpx
 from pydantic import ValidationError
+
+from api.models import CourseDataModel
+from api.schemas import Calendar, CourseList, User
+from api.utils import ZubronHelper
 
 
 class Formatter:
