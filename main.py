@@ -15,20 +15,20 @@ app = FastAPI(
 
 )
 
-# origins = [
-#     "chrome-extension://bjpnoafcpgdhpfdniojakbpbonfehoci",
-#     "http://localhost:8000",  # Agrega cualquier otro origen permitido si es necesario
-#     "https://aiep-connect-api.vercel.app"
-# ]
+origins = [
+    "chrome-extension://bjpnoafcpgdhpfdniojakbpbonfehoci",
+    "http://localhost:8000",  # Agrega cualquier otro origen permitido si es necesario
+    "https://aiep-connect-api.vercel.app"
+]
 
-# # middlewares 
-# app.add_middleware(
-#     CORSMiddleware,
-#     allow_origins=origins,
-#     allow_credentials=True,
-#     allow_methods=["*"],
-#     allow_headers=["*"],
-# )
+# middlewares 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 # Rutas de la API
