@@ -15,20 +15,20 @@ app = FastAPI(
 
 )
 
-origins = [
-    "chrome-extension://bjpnoafcpgdhpfdniojakbpbonfehoci",
-    "http://localhost:8000",  # Agrega cualquier otro origen permitido si es necesario
-    "https://aiep-connect-api.vercel.app"
-]
+# origins = [
+#     "chrome-extension://bjpnoafcpgdhpfdniojakbpbonfehoci",
+#     "http://localhost:8000",
+#     "https://aiep-connect-api.vercel.app"
+# ]
 
 # middlewares 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# app.add_middleware(
+#     CORSMiddleware,
+#     allow_origins=origins,
+#     allow_credentials=True,
+#     allow_methods=["*"],
+#     allow_headers=["*"],
+# )
 
 
 # Rutas de la API
@@ -36,4 +36,4 @@ app.include_router(router)
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=3000)
